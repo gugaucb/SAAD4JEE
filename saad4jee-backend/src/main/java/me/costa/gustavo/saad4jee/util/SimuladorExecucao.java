@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class SimuladorExecucao {
+import javax.sql.rowset.spi.SyncResolver;
+
+public final class SimuladorExecucao {
 	private static float porcentagemMenorProbabilidade = 0.01f;
 	private long[] temposEmMillis = {1, 3, 11, 13, 2000};
 	private List<Long> distribucaoProbabilisticaTempo = new ArrayList<Long>();
-	private static SimuladorExecucao  simuladorExecucao;
+	private static SimuladorExecucao simuladorExecucao;
 	private SimuladorExecucao(){
 		
 	}
@@ -17,7 +19,7 @@ public class SimuladorExecucao {
 		gerarDistribuicaoTempos(porcentagem);
 	}
 	
-	public static SimuladorExecucao getInstance(){
+	public static synchronized SimuladorExecucao getInstance(){
 		if(simuladorExecucao==null){
 			simuladorExecucao = new SimuladorExecucao();
 			simuladorExecucao.gerarDistribuicaoTempos(porcentagemMenorProbabilidade);

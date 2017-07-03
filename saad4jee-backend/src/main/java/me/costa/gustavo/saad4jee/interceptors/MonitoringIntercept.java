@@ -10,10 +10,10 @@ import javax.inject.Named;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
+import javax.servlet.http.HttpServletRequest;
 
-import me.costa.gustavo.saad4jee.annotations.ExcecaoEvent;
-import me.costa.gustavo.saad4jee.annotations.MetodoEvent;
 import me.costa.gustavo.saad4jee.annotations.Monitoring;
+import me.costa.gustavo.saad4jee.annotations.SalvarMonitorInstanciaEvent;
 import me.costa.gustavo.saad4jee.entity.DataSet;
 import me.costa.gustavo.saad4jee.entity.Dicionario;
 import me.costa.gustavo.saad4jee.entity.Instancia;
@@ -33,15 +33,12 @@ import me.costa.gustavo.saad4jee.entity.Instancia;
 @Priority(Interceptor.Priority.APPLICATION)
 public class MonitoringIntercept {
 	
+	@Inject
+    HttpServletRequest httpRequest;
+	
 	
 	@Inject
-	@ExcecaoEvent
-    private Event<Throwable> excecaoMessageEvent;
-	@Inject
-	@MetodoEvent
-	private Event<String> metodoMessageEvent;
-	
-	@Inject
+	@SalvarMonitorInstanciaEvent
 	private Event<Instancia> salvarInstanciaMessageEvent;
 	
 	@Inject
@@ -51,19 +48,17 @@ public class MonitoringIntercept {
 	public Object around(InvocationContext jp) throws Throwable {
 		Instancia instancia = new Instancia();
 		instancia.setDicionario(dicionario);
-		String metodo = jp.getMethod().getName();
-		Instant start = Instant.now();
+		final String metodo = jp.getMethod().getName();
+		final Instant start = Instant.now();
 		try {
 			return jp.proceed();
 		}catch(Throwable t){
 			instancia = DataSet.recebeEstimuloExcecaoV1(instancia, t.toString());
-			//excecaoMessageEvent.fire(t);
 			throw t;
 		
 		} finally {
-			Instant end = Instant.now();
+			final Instant end = Instant.now();
 			instancia = DataSet.recebeEstimuloMetodoV1(instancia, metodo, Duration.between(start, end));
-			//metodoMessageEvent.fire(metodo +";"+ Duration.between(start, end).toMillis());
 			salvarInstanciaMessageEvent.fire(instancia);
 		}
 

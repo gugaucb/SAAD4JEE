@@ -3,8 +3,11 @@ package me.costa.gustavo.saad4jee.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -14,19 +17,20 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import me.costa.gustavo.saad4jee.interfaces.IDicionario;
 
 @Entity
 @Named
 @RequestScoped
-public class Instancia extends BaseEntity<Serializable> implements Serializable, Cloneable {
+public class RobotDetectInstancia extends BaseEntity<Serializable> implements Serializable, Cloneable {
 	public static final int QUANT_POSICAO_INIT = 100;
-
+	@Transient
+	private final Logger LOGGER = Logger.getLogger( RobotDetectInstancia.class.getName() ); 
+	
 	@Transient
 	private static final long serialVersionUID = -3572746437024617004L;
 
 	@Transient
-	private IDicionario dicionario;
+	private RobotDetectDicionario dicionario;
 
 	@Id
 	@GeneratedValue
@@ -39,14 +43,14 @@ public class Instancia extends BaseEntity<Serializable> implements Serializable,
 	@Column(name = "max", precision = 10, scale = 2)
 	private List<Double> caracteristicas = new ArrayList<Double>(QUANT_POSICAO_INIT);
 
-	public void setDicionario(IDicionario dicionario) {
+	public void setDicionario(RobotDetectDicionario dicionario) {
 		this.dicionario = dicionario;
 	}
 
 	@Override
-	public Instancia clone() throws CloneNotSupportedException {
+	public RobotDetectInstancia clone() throws CloneNotSupportedException {
 		super.clone();
-		Instancia instancia = new Instancia();
+		RobotDetectInstancia instancia = new RobotDetectInstancia();
 		instancia.id = this.id;
 		instancia.caracteristicas = new ArrayList<Double>(this.caracteristicas);
 		instancia.dicionario = this.dicionario;
@@ -61,15 +65,18 @@ public class Instancia extends BaseEntity<Serializable> implements Serializable,
 			Integer posicao = dicionario.getPosicao(caracteristica);
 			caracteristicas.set(posicao, value + (posicao * 10000));
 		} else {
-			System.out.println("Dicionario nulo");
+			
+			LOGGER.log(Level.SEVERE, "Dicionario nulo");
 		}
 	}
 
 	public void imprimir() {
 		if (caracteristicas != null) {
+			StringBuilder caracters = new StringBuilder();
 			for (Double caract : caracteristicas) {
-				System.out.print(caract + ",");
+				caracters.append(caract + ",");
 			}
+			LOGGER.log(Level.INFO, caracters.substring(0, caracters.length()).toString());
 		}
 	}
 

@@ -28,17 +28,17 @@ public class TrapSenderVersion2 {
 	@Resource
 	ManagedExecutorService managedExecutorService;
 
-	public static final String community = "public";
+	public static final String COMMUNITY = "public";
 
 	// Sending Trap for sysLocation of RFC1213
-	public static final String Oid = ".1.3.6.1.2.1.1.8";
+	public static final String OID = ".1.3.6.1.2.1.1.8";
 
 	// IP of Local Host
-	public static final String ipAddress = "127.0.0.1";
+	public static final String IP_ADDRESS = "127.0.0.1";
 
 	// Ideally Port 162 should be used to send receive Trap, any other available
 	// Port can be used
-	public static final int port = 162;
+	public static final int PORT = 162;
 
 	public void sendTrap_Version2(final Throwable throwable, final String metodo) {
 
@@ -53,9 +53,9 @@ public class TrapSenderVersion2 {
 
 					// Create Target
 					CommunityTarget cTarget = new CommunityTarget();
-					cTarget.setCommunity(new OctetString(community));
+					cTarget.setCommunity(new OctetString(COMMUNITY));
 					cTarget.setVersion(SnmpConstants.version2c);
-					cTarget.setAddress(new UdpAddress(ipAddress + "/" + port));
+					cTarget.setAddress(new UdpAddress(IP_ADDRESS + "/" + PORT));
 					cTarget.setRetries(2);
 					cTarget.setTimeout(1000);
 
@@ -64,10 +64,10 @@ public class TrapSenderVersion2 {
 
 					// need to specify the system up time
 					pdu.add(new VariableBinding(SnmpConstants.sysUpTime, new OctetString(new Date().toString())));
-					pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(Oid)));
-					pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress, new IpAddress(ipAddress)));
+					pdu.add(new VariableBinding(SnmpConstants.snmpTrapOID, new OID(OID)));
+					pdu.add(new VariableBinding(SnmpConstants.snmpTrapAddress, new IpAddress(IP_ADDRESS)));
 
-					pdu.add(new VariableBinding(new OID(Oid), new OctetString(throwable.getClass().getName()+"-"+metodo)));
+					pdu.add(new VariableBinding(new OID(OID), new OctetString(throwable.getClass().getName()+"-"+metodo)));
 					pdu.setType(PDU.NOTIFICATION);
 
 					// Send the PDU

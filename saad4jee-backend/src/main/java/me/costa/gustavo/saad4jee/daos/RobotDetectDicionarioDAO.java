@@ -5,13 +5,13 @@ import java.io.Serializable;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 
-import me.costa.gustavo.saad4jee.entity.Dicionario;
+import me.costa.gustavo.saad4jee.entity.RobotDetectDicionario;
 
 
 
 @Named
 @RequestScoped
-public class DicionarioDAO extends GenericDaoJpaSaad4Jee<Dicionario> implements Serializable{
+public class RobotDetectDicionarioDAO extends GenericDaoJpaSaad4Jee<RobotDetectDicionario> implements Serializable{
 
 	/**
 	 * 

@@ -2,15 +2,17 @@ package me.costa.gustavo.saad4jee.ia;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import me.costa.gustavo.saad4jee.entity.DataSet;
-import me.costa.gustavo.saad4jee.entity.Dicionario;
-import me.costa.gustavo.saad4jee.entity.Instancia;
-import me.costa.gustavo.saad4jee.entity.Instancias;
+import me.costa.gustavo.saad4jee.entity.RobotDetectDataSet;
+import me.costa.gustavo.saad4jee.entity.RobotDetectDicionario;
+import me.costa.gustavo.saad4jee.entity.RobotDetectInstancia;
+import me.costa.gustavo.saad4jee.entity.RobotDetectInstancias;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -19,7 +21,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.LOF;
 
 @Singleton
-public class Anomalia {
+public class RobotDectectAnomalia {
 	private int histBins = 20;
 	private int current = 0;
 	private double max = Double.MIN_VALUE;
@@ -27,10 +29,12 @@ public class Anomalia {
 	private LOF lof;
 	private boolean treinado = false;
 	@Inject
-	private DataSet datasetClass;
+	private RobotDetectDataSet datasetClass;
 
 	@Inject
-	Dicionario dicionario;
+	RobotDetectDicionario dicionario;
+	
+	private final Logger LOGGER = Logger.getLogger( RobotDectectAnomalia.class.getName() ); 
 	
 	public void zerarIA(){
 		treinado = false;
@@ -93,22 +97,26 @@ public class Anomalia {
 		return dataset;
 	}*/
 
-	private Instances criarInstancias(Instancias instancias) {
+	private Instances criarInstancias(RobotDetectInstancias instancias) {
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		Integer ultimaPosicao = dicionario.localizaUltimaPosicao();
-		for (int i = 0; i < Instancia.QUANT_POSICAO_INIT; i++) {
+		for (int i = 0; i < RobotDetectInstancia.QUANT_POSICAO_INIT; i++) {
 			attributes.add(new Attribute("Attr-" + i));	
 		}
 		
 		Instances dataset = new Instances("My dataset", attributes, ultimaPosicao);
-		for (Instancia instancia : instancias.getInstancias()) {
-			dataset.add(new DenseInstance(1.0, Stream.of(instancia.getCaracteristicas().toArray(new Double[Instancia.QUANT_POSICAO_INIT])).mapToDouble(Double::doubleValue).toArray()));
+		for (RobotDetectInstancia instancia : instancias.getInstancias()) {
+			if(instancia.getCaracteristicas().size()>0){
+				LOGGER.log(Level.INFO, "Instancia analisada se eh anomalia.");
+				instancia.imprimir();
+				dataset.add(new DenseInstance(1.0, Stream.of(instancia.getCaracteristicas().toArray(new Double[RobotDetectInstancia.QUANT_POSICAO_INIT])).mapToDouble(Double::doubleValue).toArray()));
+			}
 		}
 		return dataset;
 		
 	}
 
-	private int calculaWinSize(Instancias instancias) {
+	private int calculaWinSize(RobotDetectInstancias instancias) {
 		return Math.round(instancias.size() * 0.30F);
 	}
 
@@ -116,8 +124,8 @@ public class Anomalia {
 		return lof;
 	}
 
-	public boolean isAnomalia() {
-
+	public boolean isAnomalia(RobotDetectInstancia instancia) {
+		LOF modelo = getModelo();
 		if (!treinado) {
 			return false;
 		}
@@ -126,19 +134,27 @@ public class Anomalia {
 			return false;
 		}
 
+		if(modelo==null){
+			return false;
+		}
 		try {
-			Instances dataset = criarInstancias(datasetClass.getInstancias().getUltimaInstanciaEmInstancias());
-			Instances predict = Filter.useFilter(dataset, lof);
+			List<RobotDetectInstancia> listaInstancia = new ArrayList<RobotDetectInstancia>();
+			listaInstancia.add(instancia);
+			RobotDetectInstancias instancias = new RobotDetectInstancias();
+			instancias.setInstancias(listaInstancia);
+			Instances dataset = criarInstancias(instancias);
+			
+			Instances predict = Filter.useFilter(dataset, modelo);
 			for (Instance inst : predict) {
 				double densidade = inst.value(inst.numAttributes() - 1);
-				System.out.println("Densidade calculada: " + densidade);
+				LOGGER.log(Level.INFO, "Densidade calculada: " + densidade);
 				if (densidade < 1 || densidade >= 2) {
 					return true;
 				}
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.log(Level.WARNING, "Falha ao verificar se eh uma anomalia", e);
 			return false;
 		}
 
