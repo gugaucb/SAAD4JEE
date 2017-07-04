@@ -7,8 +7,10 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+import me.costa.gustavo.saad4jee.daos.RobotDetectInstanciaDAO;
 import me.costa.gustavo.saad4jee.entity.RobotDetectDataSet;
 import me.costa.gustavo.saad4jee.entity.RobotDetectDicionario;
 import me.costa.gustavo.saad4jee.entity.RobotDetectInstancia;
@@ -21,6 +23,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.LOF;
 
 @Singleton
+@Named
 public class RobotDectectAnomalia {
 	private int histBins = 20;
 	private int current = 0;
@@ -33,6 +36,9 @@ public class RobotDectectAnomalia {
 
 	@Inject
 	RobotDetectDicionario dicionario;
+	
+	@Inject 
+	RobotDetectInstanciaDAO instanciaDao;
 	
 	private final Logger LOGGER = Logger.getLogger( RobotDectectAnomalia.class.getName() ); 
 	
@@ -161,13 +167,16 @@ public class RobotDectectAnomalia {
 		return false;
 	}
 
-	public LOF buildModel() {
+	public LOF buildModel(List<RobotDetectInstancia> instancias) {
 		try {
-			if (datasetClass.getInstancias() == null || datasetClass.getInstancias().isEmpty()) {
+			RobotDetectInstancias carregarInstancias = carregarInstancias(instancias);
+			if (carregarInstancias == null || carregarInstancias.isEmpty()) {
 				return null;
 			}
 			//Instances dataset = createDBOnTheFly(criarHistograma(datasetClass.getInstancias()));
-			Instances dataset = criarInstancias(datasetClass.getInstancias());
+			//Instances dataset = criarInstancias(datasetClass.getInstancias());
+			
+			Instances dataset = criarInstancias(carregarInstancias);
 			// split data to train and test
 			Instances trainData = dataset;//.testCV(2, 0);
 			//Instances testData = dataset.testCV(2, 1);
@@ -215,7 +224,7 @@ public class RobotDectectAnomalia {
 	 * @param max
 	 * @return
 	 */
-	static double normalize(double value, double min, double max) {
+	private static double normalize(double value, double min, double max) {
 		return value / (max - min);
 	}
 
@@ -227,10 +236,14 @@ public class RobotDectectAnomalia {
 	 * @param bins
 	 * @return bin no
 	 */
-	static int toBin(double normalizedValue, int bins) {
+	private static int toBin(double normalizedValue, int bins) {
 		if (normalizedValue == 1.0)
 			return bins - 1;
 		return (int) (normalizedValue * bins);
 	}
 
+	private RobotDetectInstancias carregarInstancias(List<RobotDetectInstancia> instancias){
+		return new RobotDetectInstancias(instancias);
+	}
+	
 }

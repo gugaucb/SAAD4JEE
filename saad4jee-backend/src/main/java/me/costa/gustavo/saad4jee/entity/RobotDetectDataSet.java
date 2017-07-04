@@ -3,15 +3,13 @@ package me.costa.gustavo.saad4jee.entity;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import me.costa.gustavo.saad4jee.daos.RobotDetectInstanciasDAO;
 
 /**
  * 
@@ -24,15 +22,12 @@ public class RobotDetectDataSet {
 	private final Logger LOGGER = Logger.getLogger( RobotDetectDataSet.class.getName() ); 
 	
 	@Inject
-	RobotDetectInstanciasDAO instanciasDao;
-
-	@Inject
 	private RobotDetectDicionario dicionario;
 	
 	private RobotDetectInstancias instancias = new RobotDetectInstancias();
 
 	private LocalTime agora = LocalTime.now();
-	private Map<String, IPAddress> listaDeIPs = new HashMap<String, IPAddress>();
+	private Map<String, IPAddress> listaDeIPs = new ConcurrentHashMap<String, IPAddress>();
 
 	public void zerarIA() {
 		instancias = new RobotDetectInstancias();
@@ -59,7 +54,8 @@ public class RobotDetectDataSet {
 			if (tempoEntreRequisicoes >= 0) {
 				LOGGER.log(Level.INFO, "tempoEntreRequisicoes > 0");
 				instancia.add("tempoMedioEntreRequisicoes", Double.valueOf(tempoEntreRequisicoes));
-				
+			}else{
+				instancia = null;
 			}
 			ipAddress.somarRequisicoes();
 			LOGGER.log(Level.INFO, "Acrescentado Requisicao IPAddress: "+ipAddress);

@@ -1,9 +1,9 @@
 package me.costa.gustavo.saad4jee.entity;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +37,7 @@ public class RobotDetectDicionario extends BaseEntity<Serializable> implements S
 	@ElementCollection
 	@MapKeyColumn(name = "metodos")
 	@CollectionTable(name = "lista_ips", joinColumns = @JoinColumn(name = "robotdetectdicionario_id"))
-	private	Map<String, Integer> listaMetodos = new HashMap<String, Integer>();
+	private	Map<String, Integer> listaMetodos = new ConcurrentHashMap<String, Integer>();
 
 	
 	@PostConstruct

@@ -38,7 +38,7 @@ public class IPAddress {
 	}
 
 	private void iniciarNovaContagem() {
-		this.inicio = null;
+		this.inicio = fim;
 		this.fim = null;
 	}
 	

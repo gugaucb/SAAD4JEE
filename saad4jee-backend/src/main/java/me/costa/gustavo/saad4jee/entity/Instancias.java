@@ -25,6 +25,7 @@ public class Instancias extends BaseEntity<Serializable> implements Serializable
 	@OneToMany(cascade = {CascadeType.ALL}, mappedBy="instancias")
 	private List<Instancia> listaInstancia = new ArrayList<Instancia>();
 	
+	
 	/**
 	 * 
 	 * @param listaCaracteristicas - Foto das caracteristas monitoradas em um dado momento

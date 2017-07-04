@@ -1,8 +1,8 @@
 package me.costa.gustavo.saad4jee.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
@@ -23,8 +23,16 @@ public class RobotDetectInstancias extends BaseEntity<Serializable> implements S
 	@GeneratedValue
 	private Long id;
 	@OneToMany(cascade = {CascadeType.ALL}, mappedBy="instancias")
-	private List<RobotDetectInstancia> listaInstancia = new ArrayList<RobotDetectInstancia>();
+	private List<RobotDetectInstancia> listaInstancia = new CopyOnWriteArrayList<RobotDetectInstancia>();
 	
+	public RobotDetectInstancias(List<RobotDetectInstancia> instancias) {
+			this.listaInstancia = new CopyOnWriteArrayList<RobotDetectInstancia>();
+			this.listaInstancia.addAll(instancias);
+	}
+	
+	public RobotDetectInstancias(){
+		
+	}
 	/**
 	 * 
 	 * @param listaCaracteristicas - Foto das caracteristas monitoradas em um dado momento

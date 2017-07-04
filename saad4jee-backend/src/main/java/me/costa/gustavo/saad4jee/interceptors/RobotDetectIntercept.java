@@ -1,5 +1,6 @@
 package me.costa.gustavo.saad4jee.interceptors;
 
+import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,8 +34,13 @@ import me.costa.gustavo.saad4jee.ia.RobotDectectAnomalia;
 @Named
 @Priority(Interceptor.Priority.APPLICATION)
 public class RobotDetectIntercept {
-	private final Logger LOGGER = Logger.getLogger( RobotDetectIntercept.class.getName() ); 
-	
+	private final Logger LOGGER = Logger.getLogger(RobotDetectIntercept.class.getName());
+
+	private boolean bloquearRequisicao;
+	private boolean enviarTrap;
+	private boolean emitirEvent;
+	private boolean imprimirConsole;
+
 	@Inject
 	HttpServletRequest httpRequest;
 
@@ -50,26 +56,50 @@ public class RobotDetectIntercept {
 
 	@AroundInvoke
 	public Object around(InvocationContext jp) throws Throwable {
+		recuperarParametrosAnotacao(jp);
 		LOGGER.log(Level.INFO, "Intercept");
 		if (httpRequest != null) {
 			LOGGER.log(Level.INFO, "HttpRequest nao eh nulo");
 			String remoteAddr = httpRequest.getRemoteAddr();
-			LOGGER.log(Level.INFO, "RemoteAddr: "+remoteAddr);
-			if(remoteAddr!=null){
+			LOGGER.log(Level.INFO, "RemoteAddr: " + remoteAddr);
+			if (remoteAddr != null) {
 				RobotDetectInstancia instancia = dataSet.recebeEstimuloRequisicao(remoteAddr);
-				if(instancia!=null){
+				if (instancia != null) {
 					salvarInstanciaMessageEvent.fire(instancia);
+					if (robotDectectAnomalia.isAnomalia(instancia)) {
+						if(bloquearRequisicao){
+							throw new RobotDetectException("Robo identificado.");
+						}else if(emitirEvent){
+							
+						}else if(enviarTrap){
+							
+						}else if(imprimirConsole){
+							LOGGER.log(Level.WARNING,"Robot Detectado no IP Address: "+remoteAddr);
+						}
+						
+					}
 				}
-				if (robotDectectAnomalia.isAnomalia(instancia)) {
-					throw new RobotDetectException("Robo identificado.");
-				}
+
 			}
 		}
-		try{
+		try {
 			return jp.proceed();
-		}finally{
+		} finally {
 			LOGGER.log(Level.INFO, "Metodo executado");
 		}
+	}
+
+	private void recuperarParametrosAnotacao(InvocationContext jp) {
+		Method method = jp.getMethod();
+		RobotDetect myAnnotation = method.getDeclaredAnnotation(RobotDetect.class);
+		bloquearRequisicao = myAnnotation.isBloquearRequisicao();
+		emitirEvent = myAnnotation.isEmitirEvent();
+		enviarTrap = myAnnotation.isEnviarTrap();
+		imprimirConsole = myAnnotation.isImprimirConsole();
+		LOGGER.log(Level.INFO,
+				"isBloquearRequisicao " + myAnnotation.isBloquearRequisicao() + "\nisEmitirEvent "
+						+ myAnnotation.isEmitirEvent() + "\nisEnviarTrap " + myAnnotation.isEnviarTrap()
+						+ "\nisImprimirConsole " + myAnnotation.isImprimirConsole());
 	}
 
 }

@@ -3,11 +3,11 @@ package me.costa.gustavo.saad4jee.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -41,7 +41,7 @@ public class RobotDetectInstancia extends BaseEntity<Serializable> implements Se
 
 	@ElementCollection
 	@Column(name = "max", precision = 10, scale = 2)
-	private List<Double> caracteristicas = new ArrayList<Double>(QUANT_POSICAO_INIT);
+	private List<Double> caracteristicas = new CopyOnWriteArrayList<Double>();
 
 	public void setDicionario(RobotDetectDicionario dicionario) {
 		this.dicionario = dicionario;

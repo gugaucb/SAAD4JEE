@@ -11,5 +11,8 @@ import javax.interceptor.InterceptorBinding;
 @InterceptorBinding 
 @Retention(RetentionPolicy.RUNTIME) @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface RobotDetect{
-
+	    boolean isBloquearRequisicao() default false;
+	    boolean isEnviarTrap() default false; 
+	    boolean isEmitirEvent()    default false;
+	    boolean isImprimirConsole()    default true;
 }

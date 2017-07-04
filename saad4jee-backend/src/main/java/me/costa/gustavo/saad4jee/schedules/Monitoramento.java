@@ -14,7 +14,6 @@ import me.costa.gustavo.saad4jee.daos.DicionarioDAO;
 import me.costa.gustavo.saad4jee.daos.InstanciasDAO;
 import me.costa.gustavo.saad4jee.daos.RobotDetectDicionarioDAO;
 import me.costa.gustavo.saad4jee.daos.RobotDetectInstanciaDAO;
-import me.costa.gustavo.saad4jee.daos.RobotDetectInstanciasDAO;
 import me.costa.gustavo.saad4jee.entity.DataSet;
 import me.costa.gustavo.saad4jee.entity.Dicionario;
 import me.costa.gustavo.saad4jee.entity.RobotDetectDataSet;
@@ -31,8 +30,6 @@ public class Monitoramento {
 	@Inject
 	private InstanciasDAO instanciasDAO;
 
-	@Inject
-	private RobotDetectInstanciasDAO robotDetectinstanciasDAO;
 
 	@Inject
 	private RobotDetectInstanciaDAO robotDetectinstanciaDAO;
@@ -58,7 +55,7 @@ public class Monitoramento {
 	private boolean salvoMonitoramento = false;
 	private boolean salvoRequisicaoPorMinuto = false;
 
-	@Schedule(second = "1", minute = "*/3", hour = "*", info = "Report every 1 Minutes", persistent = false)
+	@Schedule(second = "1", minute = "*/1", hour = "*", info = "Report every 1 Minutes", persistent = false)
 	private void execucaoPorMinuto() {
 		salvarEstimulos();
 		salvarRequisicaoPorMinuto();
@@ -82,10 +79,13 @@ public class Monitoramento {
 				}
 
 				if (instancias != null || !instancias.isEmpty()) {
-					robotDetectinstanciasDAO.save(instancias);
+					//robotDetectinstanciasDAO.save(instancias);
+					saveInstancias(instancias);
 				}
 			} else {
-				robotDetectinstanciasDAO.merge(instancias);
+				
+				saveInstancias(instancias);
+				//robotDetectinstanciasDAO.merge(instancias);
 				robotDetectDicionarioDao.merge(robotDetectDicionario);
 				System.out.println("RobotDetect.AtualizarEstimulos() - Total Instancias: " + instancias.size());
 			}
@@ -96,12 +96,20 @@ public class Monitoramento {
 		}
 	}
 
-	private void salvarInstancias() {
-		for (RobotDetectInstancia instancia : robotDetectDataSet.getInstancias().getInstancias()) {
-			robotDetectinstanciaDAO.merge(robotDetectDataSet.getInstancias());
+	private void mergeInstancias(RobotDetectInstancias instancias) {
+		for (RobotDetectInstancia instancia : instancias.getInstancias()) {
+			robotDetectinstanciaDAO.merge(instancia);
 		}
+		robotDetectDataSet.zerarIA();
 	}
 
+	private void saveInstancias(RobotDetectInstancias instancias) {
+		for (RobotDetectInstancia instancia : instancias.getInstancias()) {
+			robotDetectinstanciaDAO.save(instancia);
+		}
+		robotDetectDataSet.zerarIA();
+	}
+	
 	public void salvarEstimulos() {
 		dataSet.calcularMedia();
 		dataSet.somarMinuto();
