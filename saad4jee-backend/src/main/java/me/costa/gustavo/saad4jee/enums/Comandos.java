@@ -1,5 +1,7 @@
 package me.costa.gustavo.saad4jee.enums;
 
+import javax.inject.Inject;
+
 import me.costa.gustavo.saad4jee.interfaces.ICommand;
 import me.costa.gustavo.saad4jee.negocio.BloquearRequisicao;
 import me.costa.gustavo.saad4jee.negocio.EmitirEvento;
@@ -15,7 +17,7 @@ public enum Comandos {
 	ImprimirConsole(new ImprimirConsole());
 	
 	public ICommand comando;
-	
+	@Inject
 	Comandos(ICommand comando){
 		this.comando = comando;
 	}

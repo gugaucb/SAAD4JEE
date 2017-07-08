@@ -18,9 +18,7 @@ import me.costa.gustavo.saad4jee.annotations.SalvarRobotInstanciaEvent;
 import me.costa.gustavo.saad4jee.entity.RobotDetectDataSet;
 import me.costa.gustavo.saad4jee.entity.RobotDetectInstancia;
 import me.costa.gustavo.saad4jee.enums.Comandos;
-import me.costa.gustavo.saad4jee.exceptions.RobotDetectException;
 import me.costa.gustavo.saad4jee.ia.RobotDectectAnomalia;
-import me.costa.gustavo.saad4jee.interfaces.ICommand;
 import me.costa.gustavo.saad4jee.wrappers.HttpRequestWrap;
 
 /**
@@ -67,15 +65,6 @@ public class RobotDetectIntercept {
 				if (instancia != null) {
 					salvarInstanciaMessageEvent.fire(instancia);
 					if (robotDectectAnomalia.isAnomalia(instancia)) {
-						/*if(bloquearRequisicao){
-							throw new RobotDetectException("Robo identificado.");
-						}else if(emitirEvent){
-							
-						}else if(enviarTrap){
-							
-						}else if(imprimirConsole){
-							LOGGER.log(Level.WARNING,"Robot Detectado no IP Address: "+remoteAddr);
-						}*/
 						for (Comandos comandos2 : comandos) {
 							comandos2.executar(new HttpRequestWrap(httpRequest));
 						}
