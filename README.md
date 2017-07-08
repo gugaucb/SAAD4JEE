@@ -25,7 +25,18 @@ Após clonar o projeto e importá-lo na IDE, deve ser acrescentado a dependênci
 </dependency>
 ``` 
 
-### Implementação
+
+#### Anotações
+##### *@RobotDetect(comandos={Comandos.EmitirEvento, Comandos.EnviarTrap})*
+
+O atributo comandos recebe um array de comandos (comportamentos) que serão executados caso seja identificado uma requisição fora do padrão. Uma requisição fora do padrão é entendida com sendo oriunda de um robô (acesso automatizado por software). Os Comandos disponíveis são:
+
+* **Comandos.EmitirEvento:** Emite um CDI events que pode ser capturado no projeto.
+* **Comandos.EnviarTrap:** Envia um Trap SNMP na versão 2.0. *(em desenvolvimento)*
+* **Comandos.BloquearRequisicao:** Levanta uma exceção RobotDetectException que extend da exceção WebApplicationException. Nesta exceção é retornado o HTTP.Status FORBIDDEN.
+* **Comandos.ImprimirConsole:** Imprime no console o IP Address identificado como Robô.
+
+###### Implementação
 No projeto deve ser criado uma classe que implemente a classe javax.ws.rs.container.ContainerRequestFilter e sobreescrever o metodo ContainerRequestFilter.filter.
 
 ``` 
@@ -36,16 +47,7 @@ public void filter(ContainerRequestContext requestContext) throws IOException {
 } 
   ```
 
-#### Anotações
-*comandos={Comandos.EmitirEvento, Comandos.EnviarTrap})*
-
-O atributo comandos recebe um array de comandos (comportamentos) que serão executados caso seja identificado uma requisição fora do padrão. Uma requisição fora do padrão é entendida com sendo oriunda de um robô (acesso automatizado por software). Os Comandos disponíveis são:
-
-* **Comandos.EmitirEvento:** Emite um CDI events que pode ser capturado no projeto.
-* **Comandos.EnviarTrap:** Envia um Trap SNMP na versão 2.0. *(em desenvolvimento)*
-* **Comandos.BloquearRequisicao:** Levanta uma exceção RobotDetectException que extend da exceção WebApplicationException. Nesta exceção é retornado o HTTP.Status FORBIDDEN.
-* **Comandos.ImprimirConsole:** Imprime no console o IP Address identificado como Robô.
-
+###### Capturar CDI Event
 O CDI event pode ser capturado conforme exemplo abaixo:
 
 ```
@@ -54,7 +56,7 @@ public void mensagemRobotDetect(@Observes @RoboDetectEvent String mensagem) {
 }
 ```
 
-## Como funciona
+###### Como funciona
 
 A anotação *@RobotDetect* que é aplicada ao método ContainerRequestFilter.filter cria uma vinculação a um interceptor (*@Interceptor*) que permite interceptar a execução do método ContainerRequestFilter.filter. Desta forma, neste interceptador (*RobotDetectIntercept*) é identificado o IP Address por meio do classe HttpServletRequest e armazenado junto com a data e hora da primeira requisição. Após a segunda requisição é calculado a quantidade de milisegundos entre as requisições do mesmo IP Address. A quantidade de milisegundos entre as requisições é armazenadas em uma lista.
 
