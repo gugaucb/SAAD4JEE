@@ -5,14 +5,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
+
+import me.costa.gustavo.saad4jee.enums.Comandos;
 
 
 @InterceptorBinding 
 @Retention(RetentionPolicy.RUNTIME) @Target({ElementType.TYPE, ElementType.METHOD})
+
 public @interface RobotDetect{
-	    boolean isBloquearRequisicao() default false;
-	    boolean isEnviarTrap() default false; 
-	    boolean isEmitirEvent()    default false;
-	    boolean isImprimirConsole()    default true;
+	    @Nonbinding Comandos[] comandos() default {Comandos.ImprimirConsole};
 }

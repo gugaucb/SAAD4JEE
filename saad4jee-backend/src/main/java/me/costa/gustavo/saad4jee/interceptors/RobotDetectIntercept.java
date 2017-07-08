@@ -17,8 +17,11 @@ import me.costa.gustavo.saad4jee.annotations.RobotDetect;
 import me.costa.gustavo.saad4jee.annotations.SalvarRobotInstanciaEvent;
 import me.costa.gustavo.saad4jee.entity.RobotDetectDataSet;
 import me.costa.gustavo.saad4jee.entity.RobotDetectInstancia;
+import me.costa.gustavo.saad4jee.enums.Comandos;
 import me.costa.gustavo.saad4jee.exceptions.RobotDetectException;
 import me.costa.gustavo.saad4jee.ia.RobotDectectAnomalia;
+import me.costa.gustavo.saad4jee.interfaces.ICommand;
+import me.costa.gustavo.saad4jee.wrappers.HttpRequestWrap;
 
 /**
  * Inteceptor aplicado aos metodos que possuem a annotation Monitoring. O
@@ -36,11 +39,6 @@ import me.costa.gustavo.saad4jee.ia.RobotDectectAnomalia;
 public class RobotDetectIntercept {
 	private final Logger LOGGER = Logger.getLogger(RobotDetectIntercept.class.getName());
 
-	private boolean bloquearRequisicao;
-	private boolean enviarTrap;
-	private boolean emitirEvent;
-	private boolean imprimirConsole;
-
 	@Inject
 	HttpServletRequest httpRequest;
 
@@ -53,6 +51,8 @@ public class RobotDetectIntercept {
 
 	@Inject
 	RobotDectectAnomalia robotDectectAnomalia;
+
+	private Comandos[] comandos;
 
 	@AroundInvoke
 	public Object around(InvocationContext jp) throws Throwable {
@@ -67,7 +67,7 @@ public class RobotDetectIntercept {
 				if (instancia != null) {
 					salvarInstanciaMessageEvent.fire(instancia);
 					if (robotDectectAnomalia.isAnomalia(instancia)) {
-						if(bloquearRequisicao){
+						/*if(bloquearRequisicao){
 							throw new RobotDetectException("Robo identificado.");
 						}else if(emitirEvent){
 							
@@ -75,6 +75,9 @@ public class RobotDetectIntercept {
 							
 						}else if(imprimirConsole){
 							LOGGER.log(Level.WARNING,"Robot Detectado no IP Address: "+remoteAddr);
+						}*/
+						for (Comandos comandos2 : comandos) {
+							comandos2.executar(new HttpRequestWrap(httpRequest));
 						}
 						
 					}
@@ -92,14 +95,7 @@ public class RobotDetectIntercept {
 	private void recuperarParametrosAnotacao(InvocationContext jp) {
 		Method method = jp.getMethod();
 		RobotDetect myAnnotation = method.getDeclaredAnnotation(RobotDetect.class);
-		bloquearRequisicao = myAnnotation.isBloquearRequisicao();
-		emitirEvent = myAnnotation.isEmitirEvent();
-		enviarTrap = myAnnotation.isEnviarTrap();
-		imprimirConsole = myAnnotation.isImprimirConsole();
-		LOGGER.log(Level.INFO,
-				"isBloquearRequisicao " + myAnnotation.isBloquearRequisicao() + "\nisEmitirEvent "
-						+ myAnnotation.isEmitirEvent() + "\nisEnviarTrap " + myAnnotation.isEnviarTrap()
-						+ "\nisImprimirConsole " + myAnnotation.isImprimirConsole());
+		comandos = myAnnotation.comandos();
 	}
 
 }
